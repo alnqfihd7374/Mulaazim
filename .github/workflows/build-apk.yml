@@ -24,29 +24,26 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          # نترك الإصدار فارغاً ونجعل القناة 'stable' لجلب أحدث ما صدر في 2026
-          flutter-version: '' 
-          channel: 'stable'
+          # نستخدم قناة master للحصول على Dart 3.9.2 المطلوب في مشروعك
+          channel: 'master'
           cache: true
 
       - name: Flutter Doctor
         run: flutter doctor -v
 
       - name: Prepare Project
-        # أضفنا سطر لتحديث المكتبات قسراً ليتوافق مع الإصدار الجديد
         run: |
           flutter clean
-          flutter pub upgrade --major-versions
           flutter pub get
       
       - name: Build APK (Release)
-        # هذا السطر يحل مشكلة (InaccessibleObjectException) في الصورة 7
+        # هذه الإعدادات تحل خطأ "InaccessibleObjectException" و "ReferenceQueue" في الصورة 9
         env:
-          JAVA_OPTS: "--add-opens java.base/java.util=ALL-UNNAMED --add-opens java.base/java.lang.reflect=ALL-UNNAMED --add-opens java.base/java.io=ALL-UNNAMED --add-opens java.base/java.lang.ref=ALL-UNNAMED"
+          JAVA_OPTS: "--add-opens java.base/java.util=ALL-UNNAMED --add-opens java.base/java.lang.reflect=ALL-UNNAMED --add-opens java.base/java.io=ALL-UNNAMED --add-opens java.base/java.lang.ref=ALL-UNNAMED --add-opens java.base/sun.nio.ch=ALL-UNNAMED"
         run: flutter build apk --release --no-tree-shake-icons
       
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: mulaazim-apk-final
+          name: mulaazim-final-apk
           path: build/app/outputs/flutter-apk/app-release.apk
