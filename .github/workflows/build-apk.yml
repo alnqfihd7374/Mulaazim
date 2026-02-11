@@ -24,8 +24,8 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          # نستخدم إصداراً حديثاً لضمان توافق Dart 3.9.2
-          flutter-version: '3.29.0' 
+          # نترك الإصدار فارغاً ونجعل القناة 'stable' لجلب أحدث ما صدر في 2026
+          flutter-version: '' 
           channel: 'stable'
           cache: true
 
@@ -33,18 +33,20 @@ jobs:
         run: flutter doctor -v
 
       - name: Prepare Project
+        # أضفنا سطر لتحديث المكتبات قسراً ليتوافق مع الإصدار الجديد
         run: |
           flutter clean
+          flutter pub upgrade --major-versions
           flutter pub get
       
       - name: Build APK (Release)
-        # هذا الجزء هو "المفتاح" لحل خطأ الصورة السابعة
+        # هذا السطر يحل مشكلة (InaccessibleObjectException) في الصورة 7
         env:
-          JAVA_OPTS: "--add-opens java.base/java.util=ALL-UNNAMED --add-opens java.base/java.lang.reflect=ALL-UNNAMED --add-opens java.base/java.io=ALL-UNNAMED"
+          JAVA_OPTS: "--add-opens java.base/java.util=ALL-UNNAMED --add-opens java.base/java.lang.reflect=ALL-UNNAMED --add-opens java.base/java.io=ALL-UNNAMED --add-opens java.base/java.lang.ref=ALL-UNNAMED"
         run: flutter build apk --release --no-tree-shake-icons
       
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: mulaazim-app-release
+          name: mulaazim-apk-final
           path: build/app/outputs/flutter-apk/app-release.apk
